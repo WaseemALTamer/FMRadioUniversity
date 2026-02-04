@@ -13,13 +13,13 @@
 
 namespace Buttons {
 
-    // buttons pins feel free to change them but you can only do it
-    // before you run the init function
-    int button_enter_pin = 8;
-    int button_up_pin = 7;
-    int button_down_pin = 6;
-    int button_right_pin = 5;
-    int button_left_pin = 4;
+    // buttons pins are not exposed you can only change them
+    // inside this file only
+    const int button_enter_pin = 8;
+    const int button_up_pin = 7;
+    const int button_down_pin = 6;
+    const int button_right_pin = 5;
+    const int button_left_pin = 4;
 
 
 

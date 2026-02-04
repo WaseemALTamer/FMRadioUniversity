@@ -17,16 +17,20 @@
 namespace Encoder {
 
 
-    // encoder global varables
-    int encoder_clock_pin = 10; // Connected to CLK on KY-040
-    int encoder_dt_pin = 9; // dt pin
+
+    // encoder  pins are not exposed you can only change them
+    // inside this file only
+    const int encoder_clock_pin = 10; // Connected to CLK on KY-040
+    const int encoder_dt_pin = 9; // dt pin
+
+    
     const unsigned long encoder_cooldown_ms = 30;   // this is the cool down after the encoder has been rotated
                                                     // this will help avoid the encoder internal bounce effect
 
     int local_last_encoder_clock; // this will be used to detect the change after every step
 
 
-    typedef void (*EncoderCallback)(int state); // create the call back type
+    typedef void (*EncoderCallback)(int delta); // create the call back type
 
 
     const int MAX_CALLBACKS = 5; // each array can only hold 5 callbacks if you try to add 
@@ -102,7 +106,7 @@ namespace Encoder {
                 (local_last_encoder_clock == 0b01 && current_state == 0b00)) 
             {
                 if (encoder_event_cool_down_passed()) // apply the cool down 
-                on_encoder_event(-1); // the filter will decide if to trigger the event
+                    on_encoder_event(-1); // the filter will decide if to trigger the event
                 local_last_encoder_clock = current_state;
 
             }

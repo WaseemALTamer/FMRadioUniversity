@@ -19,6 +19,12 @@ void onRotate(int delta) {
     else Serial.println("Counterclockwise"); // this is -1 value
 }
 
+// This function will be called when an IR code is received (and passes your filter)
+void onIrReceived(uint16_t address, uint8_t command) {
+    Serial.print("IR code received: 0x");
+    Serial.println(address, HEX);
+    Serial.println(command, HEX);
+}
 
 
 void setup() {
@@ -32,6 +38,9 @@ void setup() {
     Encoder::init(); // set up the encoder 
     Encoder::register_encoder_callback(onRotate); // attach the function to be excuated
 
+    Infrared::init(); // set up the Infrared
+    Infrared::register_reciver_callback(onIrReceived);
+
 }
 
 
@@ -40,6 +49,7 @@ void loop() {
   // run the main Button loop so the buttons can detect 
   // and trigger the event
   
-  Buttons::loop();
-  Encoder::loop();
+  //Buttons::loop();
+  //Encoder::loop();
+  Infrared::loop();
 }
