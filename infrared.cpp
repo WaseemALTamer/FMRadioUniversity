@@ -33,7 +33,7 @@ namespace Infrared {
 
     // infrared reciver this uses the <IRremote.hpp> library
 
-    const int infrared_reciver_pin = 2;
+    const int infrared_reciver_pin = 12;
 
 
     const int reciver_cooldown_ms = 150; // this will ensure each singals should be 150ms apart

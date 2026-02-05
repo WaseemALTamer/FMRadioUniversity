@@ -84,9 +84,9 @@ namespace Ultrasound{
         pinMode(eco_pin, INPUT);
 
 
-        digitalWrite(trig_pin, LOW); // set the trig pin to low, this is  crusial since we need
-                                    // to go from low to high stay in high for 10micro seconds
-                                    // and then go back low which what triggers the 
+        digitalWrite(trig_pin, LOW);    // set the trig pin to low, this is  crusial since we need
+                                        // to go from low to high stay in high for 10micro seconds
+                                        // and then go back low which what triggers the 
     }
 
 

@@ -15,11 +15,11 @@ namespace Buttons {
 
     // buttons pins are not exposed you can only change them
     // inside this file only
-    const int button_enter_pin = 8;
-    const int button_up_pin = 7;
-    const int button_down_pin = 6;
-    const int button_right_pin = 5;
-    const int button_left_pin = 4;
+    const int button_enter_pin = 9;
+    const int button_up_pin = 8;
+    const int button_down_pin = 7;
+    const int button_right_pin = 6;
+    const int button_left_pin = 5;
 
 
 

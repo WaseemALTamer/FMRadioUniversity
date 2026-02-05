@@ -10,11 +10,13 @@ void onDistance(float distance) {
 
 void setup() {
     Serial.begin(9600);
-    Ultrasound::init();
-    Ultrasound::register_ultrasound_callback(onDistance);
+
+
+    Ultrasound::init(); // initatie the file
+    Ultrasound::register_ultrasound_callback(onDistance); // attach function to the event
 }
 
 
 void loop() {
-    Ultrasound::loop();
+    Ultrasound::loop(); // run the loop so the utrasound system 
 }

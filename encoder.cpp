@@ -20,8 +20,8 @@ namespace Encoder {
 
     // encoder  pins are not exposed you can only change them
     // inside this file only
-    const int encoder_clock_pin = 10; // Connected to CLK on KY-040
-    const int encoder_dt_pin = 9; // dt pin
+    const int encoder_clock_pin = 11; // Connected to CLK on KY-040
+    const int encoder_dt_pin = 10; // dt pin
 
     
     const unsigned long encoder_cooldown_ms = 30;   // this is the cool down after the encoder has been rotated
