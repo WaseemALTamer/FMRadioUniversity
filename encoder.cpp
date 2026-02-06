@@ -20,8 +20,8 @@ namespace Encoder {
 
     // encoder  pins are not exposed you can only change them
     // inside this file only
-    const int encoder_clock_pin = 11; // Connected to CLK on KY-040
-    const int encoder_dt_pin = 10; // dt pin
+    const int encoder_clock_pin = 12; // Connected to CLK on KY-040
+    const int encoder_dt_pin = 11; // dt pin
 
     
     const unsigned long encoder_cooldown_ms = 30;   // this is the cool down after the encoder has been rotated
@@ -76,8 +76,13 @@ namespace Encoder {
 
     }
 
-
+/*
     void loop(){
+
+        // old code this worked but it required high value of encoder_cooldown_ms so
+        // i wrote a better function check  the function  under here though this one
+        // worked better for the encoder in the lab 
+
         // this will check if the encoder state changes if it did run it run it back
         // and detect the change, then map the change to the transitino that we know
         // that are either clockwise or anticlock wise
@@ -96,7 +101,7 @@ namespace Encoder {
                 (local_last_encoder_clock == 0b10 && current_state == 0b00)) 
             {
                 if (encoder_event_cool_down_passed()) // apply the cool down 
-                    on_encoder_event(1); // the filter will decide if to trigger the event
+                    on_encoder_event(-1); // the filter will decide if to trigger the event
                 local_last_encoder_clock = current_state;
             }
             // Counter-clockwise we only accpet them if they are in these transitions [00 → 10 → 11 → 01 → 00]
@@ -106,14 +111,47 @@ namespace Encoder {
                 (local_last_encoder_clock == 0b01 && current_state == 0b00)) 
             {
                 if (encoder_event_cool_down_passed()) // apply the cool down 
-                    on_encoder_event(-1); // the filter will decide if to trigger the event
+                    on_encoder_event(1); // the filter will decide if to trigger the event
                 local_last_encoder_clock = current_state;
 
             }
 
+            //local_last_encoder_clock = current_state; // this  line of  code failed  dont add  it back
+                                                        // rely on the encoder cool down value to remove
+                                                        // the internal bounce
+
         }
 
     }
+
+
+*/
+
+    void loop() {
+        // this function only works if the clock changed this elemnates
+        // 2 of the transitions that can  lead to  you going both ways,
+        // which means that this code should in theory not work in some
+        // rotations but i have had no issues with it so far
+
+
+        int current_encoder_clock = digitalRead(encoder_clock_pin);
+        int current_encoder_dt = digitalRead(encoder_dt_pin);
+
+        // detect rising edge on current_encoder_clock
+        if (current_encoder_clock == HIGH && local_last_encoder_clock == LOW) {
+            if (encoder_event_cool_down_passed()) {
+                // this if statment takes care of the internal bounce
+                if (current_encoder_dt == LOW) {
+                    on_encoder_event(1);
+                } else {
+                    on_encoder_event(-1);
+                }
+            }
+        }
+
+        local_last_encoder_clock = current_encoder_clock;
+    }
+
 
 
     void register_encoder_callback(EncoderCallback callback) {
