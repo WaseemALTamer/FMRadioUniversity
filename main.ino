@@ -43,9 +43,12 @@ void setup() {
 
     // set current time this should not be ran when the arduino 
     // starts as the clock keeps track of the time
-    Clock::set_time(40, 59, 23);
-    Clock::set_date(6, 2, 2026);
-    Clock::set_alarm(3, 3);
+    //Clock::set_time(40, 59, 23);
+    //Clock::set_date(6, 2, 2026);
+    //Clock::set_alarm(3, 3);
+
+    // the alarm works but we need to test if the alarm is reusable
+    // later on down the line 
 }
 
 

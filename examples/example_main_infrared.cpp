@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "infrared.h"   // or whatever your header is called
+#include "infrared.h"
 
 // This function will be called when an IR code is received (and passes your filter)
 void onIrReceived(uint16_t address, uint8_t command) {
@@ -9,6 +9,7 @@ void onIrReceived(uint16_t address, uint8_t command) {
 
     Serial.print("IR code received: 0x");
     Serial.println(address, HEX);
+    Serial.print("Command: 0x");
     Serial.println(command, HEX);
 }
 

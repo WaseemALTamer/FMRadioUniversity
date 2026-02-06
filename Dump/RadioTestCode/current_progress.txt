@@ -1,0 +1,9 @@
+2/6/2026
+
+FM module is working but all  channels are static issue unknown
+possible reasons:
+1) no antana
+2) wrong code, 3 libraries have been tested so far
+2) faulty chip
+3) no local signal
+4) radio station might be down

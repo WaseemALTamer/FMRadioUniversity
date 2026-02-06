@@ -12,11 +12,14 @@
 
 
 
-// Callback type for button events
-typedef void (*ButtonCallback)(int state);
+
 
 
 namespace Buttons {
+
+    // Callback type for button events
+    typedef void (*ButtonCallback)(int state);
+
     // Initializes the button pins (call in setup)
     void init();
 
