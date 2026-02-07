@@ -14,7 +14,6 @@
 void setup() {
     Serial.begin(9600);
 
-
     Buttons::init();
     Infrared::init();
     Clock::init();
@@ -23,8 +22,6 @@ void setup() {
     Lcd_I2C::init();
     PageManager::init();
 }
-
-
 
 
 

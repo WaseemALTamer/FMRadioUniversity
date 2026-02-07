@@ -46,6 +46,12 @@ namespace Clock{
     int latest_day = 0; // this will be used to track a change in the day to trigger a date event
 
 
+    int loop_cooldown_duration_ms = 500; // we dont excuate the loop all the time, because the
+                                         // time clock  module will  update only every  second
+                                         // and the getting second and  day time  is expinsive
+                                         // it will distrub the flow of the main loop
+
+
     // incase you cant wait for the event that detect a change of date or  time then  excuate the
     // get_seconds, get_mintues ... get_year function to get  the data  that you  need this class
     // will provide a wrapper to those  functions so  do not  re intiate  the Rtc_Pcf8563 library
@@ -235,6 +241,22 @@ namespace Clock{
 
 
 
+    bool loop_cooldown_passed() {
+        // this avoid internal bounce effect for the buttons
+
+        static unsigned long last_event_time = 0;
+        unsigned long now = millis();
+
+        if (now - last_event_time < loop_cooldown_duration_ms) {
+            return false; // ignore event
+        }
+
+        last_event_time = now;
+        return true; // accept event
+    }
+
+
+
 
     void init() {
         Wire.begin(); // we start the I2C communication
@@ -243,6 +265,17 @@ namespace Clock{
 
 
     void loop() {
+
+
+        if (!loop_cooldown_passed()){
+            // we dont want the loop to be excuated every single loop
+            // this will be very  ineffecent for  the  arduino to run
+            // we aim to run it less than a second but still  in that
+            // good enough that we can detect events
+
+
+            return;
+        }
         
         int int_current_state = digitalRead(int_pin);
         if (int_current_state != int_pin_last_state){
@@ -274,7 +307,7 @@ namespace Clock{
                 get_hour() // we get the year
             );
 
-            
+
         }
 
 

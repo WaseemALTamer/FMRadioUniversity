@@ -146,12 +146,12 @@ namespace Ultrasound{
 
             // we will filter the nosie now
 
-            if (distance_cm > 400){ 
+            //if (distance_cm > 400){ 
                 // more than 400cm is inaccurate and should not trigger an
                 // event, as the  event will  be unrealiable passing noise
                 // to upper layers is dangerous for our architecture 
-                return;
-            }
+                //return;
+            //}
             
 
             // there is no need to filter by time we already do that when
