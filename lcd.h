@@ -2,10 +2,10 @@
 #define LCD_I2C_WRAPPER_H
 
 #include <Arduino.h>
-#include "Libraries/LiquidCrystal/LiquidCrystal_I2C.h"
+#include "Libraries/LiquidCrystal/LiquidCrystal.h"
+
 
 namespace Lcd_I2C {
-
 
 
     void show(char* line1, char* line2);

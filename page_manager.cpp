@@ -50,7 +50,7 @@ namespace PageManager{
 
 
     void update_page(Page* page){
-        // this function will update the page we are on
+        // this function will go from current page to the right page
         if (page -> is_visiable){
             display_page(page);
         }
@@ -99,7 +99,7 @@ namespace PageManager{
 
         snprintf(ultrasuond_sensor_page.value,
                 sizeof(ultrasuond_sensor_page.value),
-                "%d.%d cm", whole, fraction);
+                "%d.%d cm        ", whole, fraction);
 
         ultrasuond_sensor_page.value[sizeof(ultrasuond_sensor_page.value) - 1] = '\0';
 

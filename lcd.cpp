@@ -11,18 +11,25 @@
 
 
 
-#include "Libraries/LiquidCrystal/LiquidCrystal_I2C.h"
-#include "Libraries/LiquidCrystal/LiquidCrystal_I2C.cpp"
+#include "Libraries/LiquidCrystal/LiquidCrystal.h"
+#include "Libraries/LiquidCrystal/LiquidCrystal.cpp"
 
 
 
 
 
-namespace Lcd_I2C{
+namespace Lcd{
 
-
-
-    LiquidCrystal_I2C lcd(0x27, 16, 2);
+    // all pins needs to be connected to gpio apperantly
+    // RS, E, D4, D5, D6, D7
+    LiquidCrystal lcd(
+        0, // RS
+        0, // E
+        0, // D4
+        0, // D5
+        0, // D6
+        0, // D7
+    );
 
 
 
