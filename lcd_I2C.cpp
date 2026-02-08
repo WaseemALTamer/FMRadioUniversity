@@ -67,7 +67,7 @@ namespace Lcd_I2C{
 
 
     // those are warpper function
-    void set_cursor(int col, int row) {
+    void set_cursor(uint8_t  col, uint8_t  row) {
         lcd.setCursor(col, row);
     }
 
@@ -125,6 +125,7 @@ namespace Lcd_I2C{
 
         set_cursor(0, 1);
         print(line2);
+        
     }
 
 

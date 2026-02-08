@@ -11,6 +11,12 @@
 
 
 
+#define LcdDsiplay Lcd_I2C // i call it LcdDisplay so when i import the Lcd without _I2C i dont have
+                           // to go through the whole code  just to change  one var  name to another
+
+
+
+
 void setup() {
     // etner point on startup only
 
@@ -21,9 +27,10 @@ void setup() {
     Clock::init();
     Ultrasound::init();
     Encoder::init();
-    Lcd_I2C::init(); // at home am using the LCD_I2C because thats what i got
-                     // in lab we have the lcd withuot the I2C bus module
+    LcdDsiplay::init(); // at home am using the LCD_I2C because thats what i got
+                        // in lab we have the lcd withuot the I2C bus module
     PageManager::init();
+
 }
 
 
@@ -37,5 +44,5 @@ void loop() {
     Infrared::loop();
     Clock::loop();
     Ultrasound::loop();
-    Lcd_I2C::loop(); 
+    LcdDsiplay::loop(); 
 }

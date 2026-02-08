@@ -48,11 +48,12 @@ struct Page {
                              // to avoid any errors
 
 
-    bool is_editiing = false; // this will tell us if we are editing the page
+    bool is_editing = false; // this will tell us if we are editing the page
 
     // these where the cursor will be when you edit the values
-    int cursor_col = 0; // the x coor on the layer, 0 is all the way left and 16 is all the way right
-    int cursor_row = 0; // top lcd layer is 0, bottom lcd layer is 1
+    uint8_t  cursor_col = 0;  // the x coor on the layer, 0 is all the way left and 16 is all the way right
+    uint8_t  cursor_row = 1;  // top lcd layer is 0, bottom lcd layer is 1
+    
 
 
     ApplyFunction apply_function;

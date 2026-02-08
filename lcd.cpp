@@ -28,7 +28,7 @@ namespace Lcd{
         0, // D4
         0, // D5
         0, // D6
-        0, // D7
+        0  // D7
     );
 
 
@@ -141,8 +141,8 @@ namespace Lcd{
 
 
     void init(){
-        lcd.init();            // Initialize the LCD
-        lcd.backlight();       // Turn on the backlight
+        lcd.begin(16, 2);        // Initialize the LCD
+        //lcd.backlight();       // Turn on the backlight <- this is only supported on the I2C module
     }
 
 

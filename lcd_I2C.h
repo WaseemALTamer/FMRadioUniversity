@@ -4,14 +4,14 @@
 #include <Arduino.h>
 #include "Libraries/LiquidCrystal/LiquidCrystal_I2C.h"
 
-namespace Lcd_I2C {
+namespace Lcd_I2C{
 
 
 
     void show(char* line1, char* line2);
 
     // Wrapper functions around LiquidCrystal_I2C
-    void set_cursor(int col, int row);
+    void set_cursor(uint8_t  col, uint8_t  row);
     void cursor_on();
     void cursor_off();
     void blink_on();

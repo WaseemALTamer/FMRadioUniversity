@@ -141,7 +141,7 @@ namespace Clock{
     // later on down the line, as the  module that am  using is  not the same
     // one as in the labs
 
-    // get functions
+    // get functions they are wrapps
 
     // time
     byte get_seconds(){
@@ -156,7 +156,6 @@ namespace Clock{
         return rtc.getHour();
     }
 
-
     // date
     byte get_day(){
         return rtc.getDay();
@@ -168,6 +167,17 @@ namespace Clock{
 
     byte get_year(){
         return rtc.getYear();
+    }
+
+    // alarm
+
+    // time
+    byte get_alarm_mintues(){
+        return rtc.getAlarmMinute();
+    }
+
+    byte get_alarm_hour(){
+        return rtc.getAlarmHour();
     }
 
 
@@ -184,7 +194,7 @@ namespace Clock{
     // those base layers and keep them as they are
 
 
-    void set_time(byte seconds, byte mintues, byte hours){
+    void set_time(byte hours, byte mintues, byte seconds){
         // this is a simple files that sets the time for you
 
         rtc.setTime(
@@ -212,7 +222,7 @@ namespace Clock{
         );
     }
 
-    void set_alarm(byte mintues, byte hours){
+    void set_alarm(byte hours, byte mintues){
         // the clock is cabable of making alarams for certain day of the week
         // or certain days of the month but we are not  giong to support that
         // in our project lets stick to only mintues and hours every day  

@@ -5,7 +5,7 @@
 #include "Libraries/LiquidCrystal/LiquidCrystal.h"
 
 
-namespace Lcd_I2C {
+namespace Lcd {
 
 
     void show(char* line1, char* line2);

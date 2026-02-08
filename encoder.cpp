@@ -24,7 +24,7 @@ namespace Encoder {
     const int encoder_dt_pin = 11; // dt pin
 
     
-    const unsigned long encoder_cooldown_ms = 30;   // this is the cool down after the encoder has been rotated
+    const unsigned long encoder_cooldown_ms = 50;   // this is the cool down after the encoder has been rotated
                                                     // this will help avoid the encoder internal bounce effect
 
     int local_last_encoder_clock; // this will be used to detect the change after every step

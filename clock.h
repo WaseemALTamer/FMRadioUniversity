@@ -43,6 +43,10 @@ namespace Clock {
     byte get_year();
 
 
+    // functions to get the alarm time that is already set
+    byte get_alarm_mintues();
+    byte get_alarm_hour();
+
     // functions to set the time, date and alarm
     void set_time(byte seconds, byte mintues, byte hours);
     void set_date(byte day, byte months, byte fullYear);
