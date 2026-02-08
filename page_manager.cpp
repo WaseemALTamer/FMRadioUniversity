@@ -3,6 +3,17 @@
 // only works when an event occures
 
 
+
+
+// this file seems long but the structure is linear it doesnt depend on 
+// it self each page has its  own logic  it is  just that we have a lot
+// of pages each contain  there own  logic and  i put everything in one
+// file for the sake of simplisty but it is  now too  long that happens
+// a lot in C/C++ code
+
+
+
+
 #include "encoder.h"
 #include "buttons.h"
 #include "infrared.h"
@@ -10,7 +21,7 @@
 #include "clock.h"
 #include "lcd_I2C.h"
 #include "structure.h"
-
+#include "fm_radio.h"
 
 
 
@@ -351,6 +362,62 @@ namespace PageManager{
 
 
 
+    void volume_apply(){
+
+        char *buf = volume_page.value; // for simplisty
+        if (!isdigit((unsigned char)buf[0]) || !isdigit((unsigned char)buf[1])){
+            // invalid input ignore or handle error this
+            // error should not  occure unless something
+            // goes really really wrong
+            return;
+        }
+
+        // convert two ASCII digits to integer
+        int volume = (buf[0] - '0') * 10 + (buf[1] - '0');
+
+        // we double check the numbers just in case even though the clock already
+        // checks them for us but just in case something goes wrong
+        if (volume < 0) volume = 0;
+        if (volume > 15) volume = 15;
+
+        // apply the volume
+        FM_Radio::set_volume(volume);
+
+    }
+
+
+
+
+    void frequency_channel_apply(){
+        
+        char *buf = frequency_channel_page.value; // for simplisity
+
+        // double check the chars just in case again if this leads to return
+        // we got bigger problems at our hand
+        for (int i = 0; i < 4; i++){
+            if (!isdigit((unsigned char)buf[i])){
+                return;
+            }
+        }
+
+        // convert four ASCII digits to integer
+        int freq10 = 0;
+        freq10 += (buf[0] - '0') * 1000;
+        freq10 += (buf[1] - '0') * 100;
+        freq10 += (buf[2] - '0') * 10;
+        freq10 += (buf[3] - '0');
+
+
+        // again just in case we clamp the channel 
+        if (freq10 < 875) freq10 = 875;
+        if (freq10 > 1080) freq10 = 1080;
+
+        // we send the channel to the function so it gets set
+        FM_Radio::set_channel(freq10);
+
+    }
+
+
 
     void on_ultrasound_distance_event(float distance){
 
@@ -397,6 +464,14 @@ namespace PageManager{
         Clock::reset_alarm(); // we reset the alarm so it  doesnt retrigger later on 
                               // reboot as the clock module will rememeber its state
 
+
+        // because i want the alarm to make sound as well am going
+        // to set the  volume to max  for the FM_Radio and them am
+        // going to a static only channel 
+
+        FM_Radio::set_volume(15); // we set it to max
+        FM_Radio::set_channel(FM_Radio::current_channel); // set the current channel remember current channel
+                                                          // is always there as the 
 
         // note if you miss your alarm the system will tell you
         // that the alarm went of on boot, we  want that  to be
@@ -445,9 +520,7 @@ namespace PageManager{
         //________________________<time page>________________________   
         strncpy(time_page.title, "<     TIME     >\0", title_size);
         strncpy(time_page.value, "                \0", value_size);
-        time_page.is_visiable = false;
         time_page.is_editable = true;
-        time_page.is_editing = false;
         time_page.apply_function = page_apply_time; // store the apply function
         Clock::register_time_callback(on_time_event); // regester the function for the time module
                                                        // we will update  the values right there in
@@ -468,11 +541,7 @@ namespace PageManager{
         ); // write time when we start
 
         normalize_string_buffer(alarm_time_page.value, value_size); // normlise the string buffer
-
-        alarm_time_page.is_visiable = false;
         alarm_time_page.is_editable = true;
-        alarm_time_page.is_editing = false;
-
         alarm_time_page.apply_function = alarm_apply_time;
 
 
@@ -488,22 +557,40 @@ namespace PageManager{
         //________________________<ultrasound sensor page>________________________
         strncpy(ultrasuond_sensor_page.title, "<  US SENSOR   >\0", title_size);
         strncpy(ultrasuond_sensor_page.value, "                \0", value_size);
-        ultrasuond_sensor_page.is_visiable = false;
-        ultrasuond_sensor_page.is_editable = false;
-        ultrasuond_sensor_page.is_editing = false;
         Ultrasound::register_ultrasound_callback(on_ultrasound_distance_event);
 
 
 
 
 
-        //________________________<Alarm Pop up>________________________
+
+        //________________________<Volume>________________________
+        strncpy(volume_page.title,  "< VOLUME(1-15) >\0", title_size);
+        snprintf(volume_page.value, value_size, "%02d              \0", FM_Radio::get_current_volume());
+        volume_page.is_editable = true;
+        volume_page.apply_function = volume_apply;
+        
+
+
+        //________________________<frequency channel>________________________
+        strncpy(frequency_channel_page.title, "<CHANNL(MHZx10)>\0", title_size);
+        snprintf(frequency_channel_page.value, value_size ,"%04d            \0", FM_Radio::get_current_channel());
+        frequency_channel_page.is_editable = true;
+        frequency_channel_page.apply_function = frequency_channel_apply;
+
+
+        //Page humidity_page;
+
+
+
+
+
+
+
+
+        //________________________<Alarm Pop up (invisible)>________________________
         strncpy(alarm_popup_page.title, "< WAKEY  WAKEY >\0", title_size);
         strncpy(alarm_popup_page.value, "TIME FOR SCHOOL\0", value_size);
-        alarm_popup_page.is_visiable = false;
-        alarm_popup_page.is_editable = false;
-        alarm_popup_page.is_editing = false;
-
         Clock::register_alarm_callback(on_alarm_event);
         
         // this page doesnt link to any but it will link back to the page that
@@ -511,18 +598,34 @@ namespace PageManager{
 
 
 
+
+
+
+
         //________________________<Pages Connections>________________________
 
 
         //now we attach the pages togather
-        time_page.next_page = &alarm_time_page;
+        
         time_page.prev_page = &ultrasuond_sensor_page;
+        time_page.next_page = &alarm_time_page;
 
-        alarm_time_page.next_page = &ultrasuond_sensor_page;
+        
         alarm_time_page.prev_page = &time_page;
+        alarm_time_page.next_page = &volume_page;
 
+        
+        volume_page.prev_page = &alarm_time_page;
+        volume_page.next_page = &frequency_channel_page;
+
+
+        frequency_channel_page.prev_page = &volume_page;
+        frequency_channel_page.next_page = &ultrasuond_sensor_page;
+
+
+        ultrasuond_sensor_page.prev_page = &frequency_channel_page;
         ultrasuond_sensor_page.next_page = &time_page;
-        ultrasuond_sensor_page.prev_page = &alarm_time_page;
+
 
 
 

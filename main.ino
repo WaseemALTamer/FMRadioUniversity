@@ -6,7 +6,7 @@
 #include "clock.h"
 #include "lcd_I2C.h"
 #include "page_manager.h"
-
+#include "fm_radio.h"
 
 
 
@@ -22,14 +22,28 @@ void setup() {
 
     Serial.begin(9600);
 
+
+
+    // base layer
     Buttons::init();
     Infrared::init();
     Clock::init();
     Ultrasound::init();
     Encoder::init();
+    FM_Radio::init();
+
+    
+
+    // intermediate layer
+    PageManager::init();
+
+
+
+    // output layer
     LcdDsiplay::init(); // at home am using the LCD_I2C because thats what i got
                         // in lab we have the lcd withuot the I2C bus module
-    PageManager::init();
+    
+
 
 }
 
@@ -39,10 +53,19 @@ void setup() {
 void loop() {
     // main loop enter point
 
+    // base layer
     Encoder::loop();
     Buttons::loop();
     Infrared::loop();
     Clock::loop();
     Ultrasound::loop();
+    FM_Radio::loop(); // this does nothing right now but later it might do something
+
+
+    // intermediate layer
+
+
+
+    // ouput layer
     LcdDsiplay::loop(); 
 }

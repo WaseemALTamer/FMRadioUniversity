@@ -4,6 +4,17 @@
 #include <Arduino.h>
 
 
+// please note that each page you create  you are  taking 2% of the arduino
+// nano library so make very sure you dont over use the pages system please
+// and no  we  are not  goig to  redesign the  page system  we made  it for
+// effiency  and reliabl e code  so  dont even  consider changing  anything
+// esspcially chaning the  char buffers  they sensitive  esspcially for the   
+// how the schedule system works
+
+
+
+
+
 struct Page;  // this doesnt yet create the structure but it does 
               // tell the next line to know it will exist
 
@@ -42,10 +53,10 @@ struct Page {
 
     bool is_visiable = false; // this will tell us if the page is visiaible 
 
-    bool is_editable = true; // this checks if the page is editable and you
-                             // can  edit  the values  make sure  that  you
-                             // provide apply_function and set this to true
-                             // to avoid any errors
+    bool is_editable = false; // this checks if the page is editable and you
+                              // can  edit  the values  make sure  that  you
+                              // provide apply_function and set this to true
+                              // to avoid any errors
 
 
     bool is_editing = false; // this will tell us if we are editing the page
