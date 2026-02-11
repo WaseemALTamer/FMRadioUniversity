@@ -1,12 +1,13 @@
 #include "encoder.h"
 #include "buttons.h"
 #include "infrared.h"
-#include "structure.h"
+#include "fm_radio.h"
 #include "ultrasound.h"
 #include "clock.h"
 #include "lcd_I2C.h"
+#include "structure.h"
 #include "page_manager.h"
-#include "fm_radio.h"
+
 
 
 
@@ -63,7 +64,7 @@ void loop() {
 
 
     // intermediate layer
-
+    PageManager::loop();
 
 
     // ouput layer

@@ -17,24 +17,28 @@
 #include "encoder.h"
 #include "buttons.h"
 #include "infrared.h"
+
+
+#include "fm_radio.h"
 #include "ultrasound.h"
 #include "clock.h"
 #include "lcd_I2C.h"
+
+
 #include "structure.h"
-#include "fm_radio.h"
 
 
+#include "page_time.h"
+#include "page_alarm.h"
+#include "page_volume.h"
+#include "page_channel.h"
+#include "page_us_sensor.h"
+#include "page_popup_alarm.h"
 
 
 #define LcdDsiplay Lcd_I2C // i call it LcdDisplay so when i import the Lcd without _I2C i dont have
                            // to go through the whole code  just to change  one var  name to another
 
-
-
-// PLEASE READ __important__ 
-// we dont not update the page if  we are editing it please make sure
-// thats the case i didnt pre build it  into the code architecture so
-// make sure you do it
 
 
 namespace PageManager{
@@ -43,34 +47,17 @@ namespace PageManager{
     
     Page* current_page; // this will be used to track the current page displayed
 
+    // add all the pages here
+    Page* pages[] = {
+        &PageTime::page,
+        &PageAlarm::page,
+        &PageVolume::page,
+        &PageChannel::page,
+        &PageUltrasound::page,
+        &PagePopupAlarm::page
+    };
 
-    Page time_page;
-    Page alarm_time_page;
-    Page alarm_popup_page; // this is not accessable only when the clock triggers it
-    Page ultrasuond_sensor_page;
-    Page volume_page;
-    Page frequency_channel_page;
-    Page humidity_page;
-
-
-
-
-
-
-    void normalize_string_buffer(char* buffer, size_t size) {
-        // this function will loop thruogh the array remove all the terminators that
-        // you have and it will add it right at the end
-
-        if (size == 0) return; 
-
-        for (size_t i = 0; i < size - 1; i++) {
-            if (buffer[i] == '\0') {
-                buffer[i] = ' ';
-            }
-        }
-
-        buffer[size - 1] = '\0';
-    }
+    constexpr int pages_number = sizeof(pages) / sizeof(pages[0]); // calcualte the pages count
 
 
 
@@ -78,6 +65,14 @@ namespace PageManager{
 
         // if the current_page is the same as the page then the swap 
         // leads to nothing and this is what we want 
+
+        if(page->is_popup){
+            // if the page is a pop up connect it to the current page
+
+            page->next_page = current_page;
+            page->prev_page = current_page;
+        }
+
 
         current_page->is_visiable = false; // tells the other code the old page is not visiable
         page->is_visiable = true; // makes the new page visiable
@@ -91,6 +86,8 @@ namespace PageManager{
         // place the cursor where it should be
         LcdDsiplay::set_cursor(current_page->cursor_col, current_page->cursor_row); 
 
+        page->schedul_update = false; // reset the schedual update
+        page->show_page = false;
     }
 
 
@@ -105,9 +102,13 @@ namespace PageManager{
             // if the page is not getting edited
             display_page(page);
         }
+
+        page->schedul_update = false; // reset the schedual update
         
     }
 
+
+    // this section will contain the core functionality for the 
 
     void on_enter_button_event(int state){
 
@@ -153,7 +154,10 @@ namespace PageManager{
 
         if (state){ // mouse release
             if (!current_page->is_editing){
-                display_page(current_page->next_page);
+
+
+                if (current_page->next_page != nullptr) // check if the pointer exist
+                    display_page(current_page->next_page);
             }
 
             if (current_page->is_editing){
@@ -178,7 +182,9 @@ namespace PageManager{
 
         if (state){ // mouse release
             if (!current_page->is_editing){
-                display_page(current_page->prev_page);
+
+                if (current_page->prev_page != nullptr) // check if the pointer exist
+                    display_page(current_page->prev_page);
             }
 
             if (current_page->is_editing){
@@ -232,265 +238,25 @@ namespace PageManager{
     }
 
 
+    void on_infrared_event(uint16_t address, uint8_t command){
+
+        Serial.println(command);
 
 
+        // we simulate the function that we created from before nothing special
 
-    void on_time_event(int seconds, int minutes, int hours){
-        // this will be triggered by the event from the clock module
+        if (command == 28) on_enter_button_event(1);    // OK button
 
-        if (time_page.is_editing){ 
-            // again we dont not update the page if  we are editing it please make 
-            // sure thats the case i didnt pre build it into the code architecture 
-            // so make sure you do it
-            return;
-        }
-
-        size_t value_buffer_size = sizeof(time_page.value); // get the size of the string array
-
-
-        memset(time_page.value, ' ', value_buffer_size); // fill entire buffer with spaces
-        snprintf(time_page.value, 
-            value_buffer_size, 
-            "%02d:%02d:%02d", 
-            hours, 
-            minutes, 
-            seconds
-        ); // write time at the start
-
-
-        // remove all the terminators and add it at the end
-        normalize_string_buffer(time_page.value, value_buffer_size);
-
-        update_page(&time_page); // pass the page to the updator
-    }
-
-
-    void page_apply_time(){ 
-        // this function is for the time page, it will set the
-        // current time to something else  based on the values
-        // you provided in  the page .value  string array this
-        // this function  will convert  the  string  buffer to
-        // relevent data hh:mm:ss
-
-        // this function will not set the value is  your value
-        // was invalid time
-
-        int hours = 0, minutes = 0, seconds = 0;
-
-
-        const char* buf = time_page.value; // am using buf for simplisty
-
-        // simple validation expect format "hh:mm:ss"
-        // we will check for : : values just in case
-
-        if (buf[2] == ':' && buf[5] == ':') {
-            hours   = (buf[0] - '0') * 10 + (buf[1] - '0');
-            minutes = (buf[3] - '0') * 10 + (buf[4] - '0');
-            seconds = (buf[6] - '0') * 10 + (buf[7] - '0');
-
-            if (hours >= 0 && hours < 24 &&
-                minutes >= 0 && minutes < 60 &&
-                seconds >= 0 && seconds < 60) 
-            {
-                // now hours minutes seconds are ready as integers
-
-                Clock::set_time(
-                    hours,
-                    minutes,
-                    seconds
-                );
-            }
-            else {
-                // invalid time dont set
-                return;
-            }
-        }
-        else {
-            // invalid format dont set
-        }
-    }
-
-
-    void alarm_apply_time(){ 
-        // same funcality as before but this one sets the alarm
-
-        int hours = 0, minutes = 0, seconds = 0;
-
-
-        const char* buf = alarm_time_page.value; // am using buf for simplisty
-
-        // simple validation expect format "hh:mm"
-        // we will check for : values just in case
-
-        if (buf[2] == ':') {
-            hours   = (buf[0] - '0') * 10 + (buf[1] - '0');
-            minutes = (buf[3] - '0') * 10 + (buf[4] - '0');
-
-            if (hours >= 0 && hours < 24 &&
-                minutes >= 0 && minutes < 60) 
-            {
-                // now hours minutes seconds are ready as integers
-                Clock::set_alarm(
-                    hours,
-                    minutes
-                );
-            }
-            else {
-                size_t value_size = sizeof(alarm_time_page.value);
-
-                // invalid time dont set and re display the previouse correct time
-                strncpy(alarm_time_page.value, "                \0", value_size);
-                snprintf(alarm_time_page.value, 
-                    value_size, 
-                    "%02d:%02d", 
-                    Clock::get_alarm_hour(), 
-                    Clock::get_alarm_mintues()
-                ); // write time when we start
-
-                normalize_string_buffer(alarm_time_page.value, value_size); // normlise the string buffer
-
-                // now we can update the screen for the user to see the correct time
-                update_page(current_page);
-
-                return;
-            }
-        }
-        else {
-            // invalid format dont set
-        }
-    }
-
-
-
-    void volume_apply(){
-
-        char *buf = volume_page.value; // for simplisty
-        if (!isdigit((unsigned char)buf[0]) || !isdigit((unsigned char)buf[1])){
-            // invalid input ignore or handle error this
-            // error should not  occure unless something
-            // goes really really wrong
-            return;
-        }
-
-        // convert two ASCII digits to integer
-        int volume = (buf[0] - '0') * 10 + (buf[1] - '0');
-
-        // we double check the numbers just in case even though the clock already
-        // checks them for us but just in case something goes wrong
-        if (volume < 0) volume = 0;
-        if (volume > 15) volume = 15;
-
-        // apply the volume
-        FM_Radio::set_volume(volume);
-
+        if (command == 24) on_encoder_event(1);         // up arrow button
+        if (command == 82) on_encoder_event(-1);        // down arrow button
+        if (command == 90) on_right_button_event(1);    // right arrow button
+        if (command == 8) on_left_button_event(1);     // left arrow button
     }
 
 
 
 
-    void frequency_channel_apply(){
-        
-        char *buf = frequency_channel_page.value; // for simplisity
 
-        // double check the chars just in case again if this leads to return
-        // we got bigger problems at our hand
-        for (int i = 0; i < 4; i++){
-            if (!isdigit((unsigned char)buf[i])){
-                return;
-            }
-        }
-
-        // convert four ASCII digits to integer
-        int freq10 = 0;
-        freq10 += (buf[0] - '0') * 1000;
-        freq10 += (buf[1] - '0') * 100;
-        freq10 += (buf[2] - '0') * 10;
-        freq10 += (buf[3] - '0');
-
-
-        // again just in case we clamp the channel 
-        if (freq10 < 875) freq10 = 875;
-        if (freq10 > 1080) freq10 = 1080;
-
-        // we send the channel to the function so it gets set
-        FM_Radio::set_channel(freq10);
-
-    }
-
-
-
-    void on_ultrasound_distance_event(float distance){
-
-        if (ultrasuond_sensor_page.is_editing){ 
-            // this if statment is for redundency we dont need it since 
-            // this page is not editable
-            return;
-        }
-
-        int whole = (int)distance;
-        int fraction = (int)((distance - whole) * 10);
-
-        int value_buffer_size = sizeof(ultrasuond_sensor_page.value);
-
-        // fill the buffer with white space
-        for (int i = 0; i < value_buffer_size - 1; i++) {
-            ultrasuond_sensor_page.value[i] = ' ';
-        }
-
-        // add the ultra sound data
-        snprintf(
-            ultrasuond_sensor_page.value, 
-            value_buffer_size, 
-            "%d.%d", 
-            whole, 
-            fraction
-        );
-
-        // remove the terminator that the snprinf leaves and add it at the end
-        normalize_string_buffer(ultrasuond_sensor_page.value, value_buffer_size);
-        
-
-        // add the units
-        ultrasuond_sensor_page.value[value_buffer_size - 3] = 'c'; 
-        ultrasuond_sensor_page.value[value_buffer_size - 2] = 'm';
-
-        // update the page
-        update_page(&ultrasuond_sensor_page);
-    }
-
-
-    void on_alarm_event(){
-
-        Clock::reset_alarm(); // we reset the alarm so it  doesnt retrigger later on 
-                              // reboot as the clock module will rememeber its state
-
-
-        // because i want the alarm to make sound as well am going
-        // to set the  volume to max  for the FM_Radio and them am
-        // going to a static only channel 
-
-        FM_Radio::set_volume(15); // we set it to max
-        FM_Radio::set_channel(FM_Radio::current_channel); // set the current channel remember current channel
-                                                          // is always there as the 
-
-        // note if you miss your alarm the system will tell you
-        // that the alarm went of on boot, we  want that  to be
-        // honest, not a bug that a feature
-
-        if (current_page->is_editing){
-            // stop editing if we  are editing  the page  we are on
-            // note we  dont  apply  the changes  this will  either
-            // be over writen if it  runs through  an  event system
-            // or will stay the same until they apply it them selfs
-            current_page->is_editing = false;
-        }
-
-        // make both buttons lead to the page that you where on
-        alarm_popup_page.next_page = current_page;
-        alarm_popup_page.prev_page = current_page;
-
-        display_page(&alarm_popup_page); // we now display the popup page
-    }
 
 
 
@@ -506,6 +272,10 @@ namespace PageManager{
         Encoder::register_encoder_callback(on_encoder_event);
 
 
+        // attach the infrared function
+
+        Infrared::register_reciver_callback(on_infrared_event);
+
         // do not set the cursor_col, and cursor_row for the pages i spent
         // 42 mintues debugging it to know why the cursor was top left and
         // it turned out i was  over writing  what was  getting intiatised
@@ -514,124 +284,67 @@ namespace PageManager{
 
         // we dont need to caulcate them again all the pages have the
         // same structure and buffer size most importantly
-        size_t title_size = sizeof(time_page.title); // get the size of the string array
-        size_t value_size = sizeof(time_page.value); // get the size of the string array
-
-        //________________________<time page>________________________   
-        strncpy(time_page.title, "<     TIME     >\0", title_size);
-        strncpy(time_page.value, "                \0", value_size);
-        time_page.is_editable = true;
-        time_page.apply_function = page_apply_time; // store the apply function
-        Clock::register_time_callback(on_time_event); // regester the function for the time module
-                                                       // we will update  the values right there in
-                                                       // the function
 
 
-        //________________________<alarm time page>________________________
-        strncpy(alarm_time_page.title, "<  ALARM TIME  >\0", title_size);
 
-        // we need to set the time on start we get it from the clock
+        // first lets add all the pages to the array
+
         
-        strncpy(alarm_time_page.value, "                \0", value_size);
-        snprintf(alarm_time_page.value, 
-            value_size, 
-            "%02d:%02d", 
-            Clock::get_alarm_hour(), 
-            Clock::get_alarm_mintues()
-        ); // write time when we start
 
-        normalize_string_buffer(alarm_time_page.value, value_size); // normlise the string buffer
-        alarm_time_page.is_editable = true;
-        alarm_time_page.apply_function = alarm_apply_time;
+        // intialise pages we do it manually
+        PageTime::init();
+        PageAlarm::init();
+        PageVolume::init();
+        PageChannel::init();
+        PageUltrasound::init();
+        PagePopupAlarm::init();
 
-
-        // this page doesnt operate on event there is no event that triggers it
-
-
-
-
-
-
-
-
-        //________________________<ultrasound sensor page>________________________
-        strncpy(ultrasuond_sensor_page.title, "<  US SENSOR   >\0", title_size);
-        strncpy(ultrasuond_sensor_page.value, "                \0", value_size);
-        Ultrasound::register_ultrasound_callback(on_ultrasound_distance_event);
-
-
-
-
-
-
-        //________________________<Volume>________________________
-        strncpy(volume_page.title,  "< VOLUME(1-15) >\0", title_size);
-        snprintf(volume_page.value, value_size, "%02d              \0", FM_Radio::get_current_volume());
-        volume_page.is_editable = true;
-        volume_page.apply_function = volume_apply;
         
 
 
-        //________________________<frequency channel>________________________
-        strncpy(frequency_channel_page.title, "<CHANNL(MHZx10)>\0", title_size);
-        snprintf(frequency_channel_page.value, value_size ,"%04d            \0", FM_Radio::get_current_channel());
-        frequency_channel_page.is_editable = true;
-        frequency_channel_page.apply_function = frequency_channel_apply;
+        // page connections we do them manyally
 
-
-        //Page humidity_page;
-
-
-
-
-
-
-
-
-        //________________________<Alarm Pop up (invisible)>________________________
-        strncpy(alarm_popup_page.title, "< WAKEY  WAKEY >\0", title_size);
-        strncpy(alarm_popup_page.value, "TIME FOR SCHOOL\0", value_size);
-        Clock::register_alarm_callback(on_alarm_event);
+        PageTime::page.prev_page = &PageUltrasound::page;
+        PageTime::page.next_page = &PageAlarm::page;
         
-        // this page doesnt link to any but it will link back to the page that
-        //  you where on before when it is time for the alarm
+        PageAlarm::page.prev_page = &PageTime::page;
+        PageAlarm::page.next_page = &PageVolume::page;
+
+        PageVolume::page.prev_page = &PageAlarm::page;
+        PageVolume::page.next_page = &PageChannel::page;
+
+        PageChannel::page.prev_page = &PageVolume::page;
+        PageChannel::page.next_page = &PageUltrasound::page;
+
+        PageUltrasound::page.prev_page = &PageChannel::page;
+        PageUltrasound::page.next_page = &PageTime::page;
+
+        // note we dont connect the popup page
+
+        display_page(&PageTime::page);  // we pass the pointer to the function to display 
+                                        // the starter page
+
+    }
 
 
 
+    void loop(){
+        // this function is added for the manager to loop through
+        // the  page that is  displayed and check  if it requires
+        // an update
 
+        for (int i = 0; i < pages_number; ++i) {
+            if (pages[i] != nullptr && pages[i]->schedul_update){
+                update_page(pages[i]); // we update the page
+            }
+        }
 
-
-
-        //________________________<Pages Connections>________________________
-
-
-        //now we attach the pages togather
+        for (int i = 0; i < pages_number; ++i) {
+            if (pages[i] != nullptr && pages[i]->show_page){
+                display_page(pages[i]); // we update the page
+            }
+        }
         
-        time_page.prev_page = &ultrasuond_sensor_page;
-        time_page.next_page = &alarm_time_page;
-
-        
-        alarm_time_page.prev_page = &time_page;
-        alarm_time_page.next_page = &volume_page;
-
-        
-        volume_page.prev_page = &alarm_time_page;
-        volume_page.next_page = &frequency_channel_page;
-
-
-        frequency_channel_page.prev_page = &volume_page;
-        frequency_channel_page.next_page = &ultrasuond_sensor_page;
-
-
-        ultrasuond_sensor_page.prev_page = &frequency_channel_page;
-        ultrasuond_sensor_page.next_page = &time_page;
-
-
-
-
-
-        display_page(&time_page); // we pass the pointer to the function to display 
-                                  // the starter page
 
     }
 

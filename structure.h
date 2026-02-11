@@ -66,11 +66,28 @@ struct Page {
     uint8_t  cursor_row = 1;  // top lcd layer is 0, bottom lcd layer is 1
     
 
+    bool schedul_update = false; // this will be set to true when the page needs an update
+                                 // lcd wise it will schedul_update every time the buffers
+                                 // change  to inform  the upper  layer that  they need to
+                                 // update note that
+
+
+    bool is_popup = false; // this will tell us if the page is a popup if it is
+                           // and has the show_page set  to true then this will
+                           // show the page note  that if  this a popup it will
+                           // link back to the page that it came from  
+
+    bool show_page = false; // if this is true it will be displayed on the scren
+                            // and the other pages you  need to  write the locic
+                            // in the page manager 
+
 
     ApplyFunction apply_function;
 
     Page* next_page;
     Page* prev_page;
+
+
 };
 
 #endif // PAGE_H

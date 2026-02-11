@@ -5,9 +5,11 @@
 #include "encoder.h"
 #include "buttons.h"
 #include "infrared.h"
+#include "fm_radio.h"
 #include "ultrasound.h"
 #include "clock.h"
 #include "lcd_I2C.h"
+
 #include "structure.h"
 
 
@@ -20,6 +22,8 @@ namespace PageManager {
     // exposed this will only live on events  
     
     void init();
+
+    void loop();
 
 }
 
