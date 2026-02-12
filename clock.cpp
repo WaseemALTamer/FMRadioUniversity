@@ -60,7 +60,7 @@ namespace Clock{
 
     // events
 
-    const int MAX_CALLBACKS = 5; // each array can only hold 5 callbacks if you try to add 
+    const int MAX_CALLBACKS = 1; // each array can only hold 5 callbacks if you try to add 
                                  // more than 5 callbacks then what  comes after 5 will be
                                  // ignored
 

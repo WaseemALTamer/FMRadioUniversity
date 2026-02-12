@@ -43,7 +43,7 @@ namespace Buttons {
     typedef void (*ButtonCallback)(int state); // create the call back type
 
 
-    const int MAX_CALLBACKS = 5; // each array can only hold 5 callbacks
+    const int MAX_CALLBACKS = 1; // each array can only hold 5 callbacks
 
     ButtonCallback enter_callbacks[MAX_CALLBACKS];
     int enter_callback_count = 0;

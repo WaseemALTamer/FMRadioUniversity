@@ -43,7 +43,7 @@ namespace Infrared {
     typedef void (*ReciverCallback)(uint16_t address, uint8_t command); // this incldues the address of the remove trying to communcate
                                                                         // and the command that it is trying to excuate
 
-    const int MAX_CALLBACKS = 5; // each array can only hold 5 callbacks if you try to add 
+    const int MAX_CALLBACKS = 1; // each array can only hold 5 callbacks if you try to add 
                                  // more than 5 callbacks then what  comes after 5 will be
                                  // ignored
 

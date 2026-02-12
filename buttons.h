@@ -34,4 +34,4 @@ namespace Buttons {
     void register_left_button_callback(ButtonCallback callback);
 }
 
-#endif // BUTTONS_H
+#endif

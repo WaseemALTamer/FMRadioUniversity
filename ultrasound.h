@@ -23,4 +23,4 @@ namespace Ultrasound {
 
 }
 
-#endif // ULTRASOUND_H
+#endif

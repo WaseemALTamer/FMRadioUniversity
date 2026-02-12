@@ -34,6 +34,7 @@
 #include "page_channel.h"
 #include "page_us_sensor.h"
 #include "page_popup_alarm.h"
+#include "page_enviroment.h"
 
 
 #define LcdDsiplay Lcd_I2C // i call it LcdDisplay so when i import the Lcd without _I2C i dont have
@@ -54,7 +55,8 @@ namespace PageManager{
         &PageVolume::page,
         &PageChannel::page,
         &PageUltrasound::page,
-        &PagePopupAlarm::page
+        &PagePopupAlarm::page,
+        &PageEnviroment::page
     };
 
     constexpr int pages_number = sizeof(pages) / sizeof(pages[0]); // calcualte the pages count
@@ -245,12 +247,17 @@ namespace PageManager{
 
         // we simulate the function that we created from before nothing special
 
+
+        // this is hard coding them this needs to change later on down the line
+        // make an map inside the infrared header file or cpp file just get rid
+        // of it please
+
         if (command == 28) on_enter_button_event(1);    // OK button
 
         if (command == 24) on_encoder_event(1);         // up arrow button
         if (command == 82) on_encoder_event(-1);        // down arrow button
         if (command == 90) on_right_button_event(1);    // right arrow button
-        if (command == 8) on_left_button_event(1);     // left arrow button
+        if (command == 8) on_left_button_event(1);      // left arrow button
     }
 
 
@@ -298,13 +305,13 @@ namespace PageManager{
         PageChannel::init();
         PageUltrasound::init();
         PagePopupAlarm::init();
-
+        PageEnviroment::init();
         
 
 
         // page connections we do them manyally
 
-        PageTime::page.prev_page = &PageUltrasound::page;
+        PageTime::page.prev_page = &PageEnviroment::page;
         PageTime::page.next_page = &PageAlarm::page;
         
         PageAlarm::page.prev_page = &PageTime::page;
@@ -317,7 +324,10 @@ namespace PageManager{
         PageChannel::page.next_page = &PageUltrasound::page;
 
         PageUltrasound::page.prev_page = &PageChannel::page;
-        PageUltrasound::page.next_page = &PageTime::page;
+        PageUltrasound::page.next_page = &PageEnviroment::page;
+
+        PageEnviroment::page.prev_page = &PageUltrasound::page;
+        PageEnviroment::page.next_page = &PageTime::page;
 
         // note we dont connect the popup page
 
@@ -344,7 +354,7 @@ namespace PageManager{
                 display_page(pages[i]); // we update the page
             }
         }
-        
+
 
     }
 

@@ -1,12 +1,20 @@
+// base layer
 #include "encoder.h"
 #include "buttons.h"
 #include "infrared.h"
 #include "fm_radio.h"
 #include "ultrasound.h"
 #include "clock.h"
-#include "lcd_I2C.h"
-#include "structure.h"
+#include "environment.h"
+
+
+// intermediate layer
 #include "page_manager.h"
+#include "structure.h"
+
+
+// output layer
+#include "lcd_I2C.h"
 
 
 
@@ -14,6 +22,8 @@
 
 #define LcdDsiplay Lcd_I2C // i call it LcdDisplay so when i import the Lcd without _I2C i dont have
                            // to go through the whole code  just to change  one var  name to another
+
+
 
 
 
@@ -31,8 +41,9 @@ void setup() {
     Clock::init();
     Ultrasound::init();
     Encoder::init();
+    Environment::init();
     FM_Radio::init();
-
+    
     
 
     // intermediate layer
@@ -43,8 +54,6 @@ void setup() {
     // output layer
     LcdDsiplay::init(); // at home am using the LCD_I2C because thats what i got
                         // in lab we have the lcd withuot the I2C bus module
-    
-
 
 }
 
@@ -54,12 +63,18 @@ void setup() {
 void loop() {
     // main loop enter point
 
+
+
+
+
     // base layer
     Encoder::loop();
     Buttons::loop();
     Infrared::loop();
     Clock::loop();
     Ultrasound::loop();
+    Environment::loop();
+
     FM_Radio::loop(); // this does nothing right now but later it might do something
 
 

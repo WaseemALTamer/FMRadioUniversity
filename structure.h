@@ -46,6 +46,8 @@ struct Page {
     // or letter or whatever is actually displayed on the lcd
 
     char title[17];   // e.g. "Time", "Volume", "Frequency" layer one of the lcd
+    
+    
     char value[17];   // e.g. "12:34", "5", "101.1"         layer two of the lcd
 
 
@@ -90,7 +92,7 @@ struct Page {
 
 };
 
-#endif // PAGE_H
+#endif
 
 
 
